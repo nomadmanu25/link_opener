@@ -1,59 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Random Link Opener</title>
-<style>
-  body { font-family: Arial, sans-serif; padding: 2em; text-align: center; }
-  button { font-size: 1.5em; padding: 1em 2em; cursor: pointer; }
-  p { margin-top: 1em; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Link Opener</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2em;
+      text-align: center;
+    }
+    p {
+      margin-top: 1em;
+    }
+  </style>
 </head>
 <body>
-  <h1>Random Link Opener</h1>
-  <button id="openBtn" disabled>Loading links...</button>
-  <p id="status"></p>
+  <h1>Opening Random Link...</h1>
+  <p id="status">Please wait...</p>
 
-<script>
-  const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-NQ6H9hA0rGr8HWZvUQ3L5K-nztAFox3sRQOSXRhgZa82KaWwpURiJkuLff2AGNWf2qt3T1oWV2gi/pub?gid=0&single=true&output=csv";
+  <script>
+    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-NQ6H9hA0rGr8HWZvUQ3L5K-nztAFox3sRQOSXRhgZa82KaWwpURiJkuLff2AGNWf2qt3T1oWV2gi/pub?gid=0&single=true&output=csv";
 
-  async function fetchLinks() {
-    try {
-      const response = await fetch(csvUrl);
-      if (!response.ok) throw new Error("Failed to load CSV");
-      const text = await response.text();
-      const lines = text.trim().split("\n");
-      // Filter only non-empty lines starting with http
-      const links = lines.filter(line => line.trim().startsWith("http"));
-      if (links.length === 0) throw new Error("No valid links found");
-      return links;
-    } catch (e) {
-      document.getElementById("status").textContent = "Error: " + e.message;
-      return [];
+    async function fetchLinks() {
+      try {
+        const response = await fetch(csvUrl);
+        if (!response.ok) throw new Error("Failed to load CSV");
+        const text = await response.text();
+        const lines = text.trim().split("\n");
+        const links = lines.filter(line => line.trim().startsWith("http"));
+        if (links.length === 0) throw new Error("No valid links found");
+        return links;
+      } catch (e) {
+        document.getElementById("status").textContent = "Error: " + e.message;
+        return [];
+      }
     }
-  }
 
-  async function init() {
-    const links = await fetchLinks();
-    const btn = document.getElementById("openBtn");
-    if (links.length === 0) {
-      btn.textContent = "No links to open";
-      btn.disabled = true;
-      return;
+    async function openRandomLink() {
+      const links = await fetchLinks();
+      if (links.length === 0) return;
+      const url = links[Math.floor(Math.random() * links.length)];
+      document.getElementById("status").textContent = "Opening: " + url;
+      window.location.href = url; // Use _blank if you want a new tab instead
     }
-    btn.textContent = "Open Random Link";
-    btn.disabled = false;
 
-    btn.onclick = () => {
-      const randomIndex = Math.floor(Math.random() * links.length);
-      const url = links[randomIndex];
-      window.open(url, "_blank");
-      document.getElementById("status").textContent = "Opened: " + url;
-    };
-  }
-
-  window.onload = init;
-</script>
+    window.onload = openRandomLink;
+  </script>
 </body>
 </html>
