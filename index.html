@@ -42,7 +42,7 @@
       if (links.length === 0) return;
       const url = links[Math.floor(Math.random() * links.length)];
       document.getElementById("status").textContent = "Opening: " + url;
-      window.location.href = url; // Use _blank if you want a new tab instead
+      window.open(url, "_blank");
     }
 
     window.onload = openRandomLink;
