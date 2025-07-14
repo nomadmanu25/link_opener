@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Random Link Opener</title>
+  <title>Random Tinder Opener</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 2em;
       text-align: center;
+      padding: 3em;
+    }
+    button {
+      font-size: 1.5em;
+      padding: 1em 2em;
+      cursor: pointer;
     }
     p {
       margin-top: 1em;
@@ -16,8 +21,9 @@
   </style>
 </head>
 <body>
-  <h1>Opening Random Link...</h1>
-  <p id="status">Please wait...</p>
+  <h1>Open Random Tinder Link</h1>
+  <button id="openBtn">Tap to Open</button>
+  <p id="status">Ready</p>
 
   <script>
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT-NQ6H9hA0rGr8HWZvUQ3L5K-nztAFox3sRQOSXRhgZa82KaWwpURiJkuLff2AGNWf2qt3T1oWV2gi/pub?gid=0&single=true&output=csv";
@@ -28,7 +34,7 @@
         if (!response.ok) throw new Error("Failed to load CSV");
         const text = await response.text();
         const lines = text.trim().split("\n");
-        const links = lines.filter(line => line.trim().startsWith("http"));
+        const links = lines.filter(line => line.trim().startsWith("http") || line.trim().startsWith("tinder://"));
         if (links.length === 0) throw new Error("No valid links found");
         return links;
       } catch (e) {
@@ -37,15 +43,24 @@
       }
     }
 
-    async function openRandomLink() {
-      const links = await fetchLinks();
-      if (links.length === 0) return;
-      const url = links[Math.floor(Math.random() * links.length)];
-      document.getElementById("status").textContent = "Opening: " + url;
-      window.open(url, "_blank");
+    let links = [];
+
+    async function init() {
+      links = await fetchLinks();
+      if (links.length === 0) {
+        document.getElementById("openBtn").disabled = true;
+        document.getElementById("status").textContent = "No links available.";
+      }
     }
 
-    window.onload = openRandomLink;
+    document.getElementById("openBtn").addEventListener("click", () => {
+      if (!links.length) return;
+      const url = links[Math.floor(Math.random() * links.length)];
+      document.getElementById("status").textContent = "Opening: " + url;
+      window.location.href = url;
+    });
+
+    window.onload = init;
   </script>
 </body>
 </html>
